@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:,">
+    <title>Basic Calculator</title>
+    <link href="/dist/output.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .btn-operator {
+            background-color: #f59e0b;
+            color: white;
+        }
+        .btn-operator:hover {
+            background-color: #d97706;
+        }
+        .btn-equals {
+            background-color: #10b981;
+            color: white;
+        }
+        .btn-equals:hover {
+            background-color: #059669;
+        }
+        .btn-clear {
+            background-color: #ef4444;
+            color: white;
+        }
+        .btn-clear:hover {
+            background-color: #dc2626;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <header class="bg-blue-600 p-4 text-white text-center shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="index.html" class="text-white hover:text-gray-200">
+                <i class="fas fa-arrow-left mr-2"></i> Back
+            </a>
+            <h1 class="text-2xl font-bold">Basic Calculator</h1>
+            <div class="w-8"></div> <!-- Spacer for alignment -->
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 max-w-md">
+        <!-- Display -->
+        <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+            <div id="display" class="text-right text-3xl font-mono h-12 overflow-x-auto">
+                0
+            </div>
+            <div id="operation" class="text-right text-gray-500 h-6">
+                &nbsp;
+            </div>
+        </div>
+
+        <!-- Calculator Buttons -->
+        <div class="grid grid-cols-4 gap-3">
+            <!-- Row 1 -->
+            <button onclick="clearDisplay()" class="btn-clear p-4 rounded-lg font-bold text-xl shadow hover:shadow-md transition">
+                AC
+            </button>
+            <button onclick="appendOperator('/')" class="btn-operator p-4 rounded-lg font-bold text-xl shadow hover:shadow-md transition">
+                ÷
+            </button>
+            <button onclick="appendOperator('*')" class="btn-operator p-4 rounded-lg font-bold text-xl shadow hover:shadow-md transition">
+                ×
+            </button>
+            <button onclick="backspace()" class="bg-gray-200 p-4 rounded-lg font-bold text-xl shadow hover:bg-gray-300 hover:shadow-md transition">
+                ⌫
+            </button>
+
+            <!-- Row 2 -->
+            <button onclick="appendNumber('7')" class="bg-white p-4 rounded-lg font-bold text-xl shadow hover:bg-gray-100 hover:shadow-md transition">
+                7
+            </button>
+            <button onclick="appendNumber('8')" class="bg-white p-4 rounded-lg font-bold text-xl shadow hover:bg-gray-100 hover:shadow-md transition">
+                8
+            </button>
+            <button onclick="appendNumber('9')" class="bg-white p-4 rounded-lg font-bold text-xl shadow hover:bg-gray-100 hover:shadow-md transition">
+                9
+            </button>
+            <button onclick="appendOperator('-')" class="btn-operator p-4 rounded-lg font-bold text-xl shadow hover:shadow-md transition">
+                -
+            </button>
+
+            <!-- Row 3 -->
+            <button onclick="appendNumber('4')" class="bg-white p-4 rounded-lg font-bold text-xl shadow hover:bg-gray-100 hover:shadow-md transition">
+                4
+            </button>
+            <button onclick="appendNumber('5')" class="bg-white p-4 rounded-lg font-bold text-xl shadow hover:bg-gray-100 hover:shadow-md transition">
+                5
+            </button>
+            <button onclick="appendNumber('6')" class="bg-white p-4 rounded-lg font-bold text-xl shadow hover:bg-gray-100 hover:shadow-md transition">
+                6
+            </button>
+            <button onclick="appendOperator('+')" class="btn-operator p-4 rounded-lg font-bold text-xl shadow hover:shadow-md transition">
+                +
+            </button>
+
+            <!-- Row 4 -->
+            <button onclick="appendNumber('1')" class="bg-white p-4 rounded-lg font-bold text-xl shadow hover:bg-gray-100 hover:shadow-md transition">
+                1
+            </button>
+            <button onclick="appendNumber('2')" class="bg-white p-4 rounded-lg font-bold text-xl shadow hover:bg-gray-100 hover:shadow-md transition">
+                2
+            </button>
+            <button onclick="appendNumber('3')" class="bg-white p-4 rounded-lg font-bold text-xl shadow hover:bg-gray-100 hover:shadow-md transition">
+                3
+            </button>
+            <button onclick="calculate()" class="btn-equals p-4 rounded-lg font-bold text-xl shadow hover:shadow-md transition row-span-2">
+                =
+            </button>
+
+            <!-- Row 5 -->
+            <button onclick="appendNumber('0')" class="bg-white p-4 rounded-lg font-bold text-xl shadow hover:bg-gray-100 hover:shadow-md transition col-span-2">
+                0
+            </button>
+            <button onclick="appendNumber('.')" class="bg-white p-4 rounded-lg font-bold text-xl shadow hover:bg-gray-100 hover:shadow-md transition">
+                .
+            </button>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white p-4 text-center mt-8">
+        <p>&copy; 2023 Calculator App | <a href="index.html" class="text-blue-300 hover:underline">All Calculators</a></p>
+    </footer>
+
+    <script>
+        let currentInput = '0';
+        let previousInput = '';
+        let operation = null;
+        let resetInput = false;
+
+        const display = document.getElementById('display');
+        const operationDisplay = document.getElementById('operation');
+
+        function updateDisplay() {
+            display.textContent = currentInput;
+            operationDisplay.textContent = previousInput + (operation ? ' ' + operation : '');
+        }
+
+        function appendNumber(number) {
+            if (currentInput === '0' || resetInput) {
+                currentInput = number;
+                resetInput = false;
+            } else {
+                currentInput += number;
+            }
+            updateDisplay();
+        }
+
+        function appendOperator(op) {
+            if (operation !== null) calculate();
+            previousInput = currentInput;
+            operation = op;
+            resetInput = true;
+            updateDisplay();
+        }
+
+        function calculate() {
+            let result;
+            const prev = parseFloat(previousInput);
+            const current = parseFloat(currentInput);
+
+            if (isNaN(prev) || isNaN(current)) return;
+
+            switch (operation) {
+                case '+':
+                    result = prev + current;
+                    break;
+                case '-':
+                    result = prev - current;
+                    break;
+                case '*':
+                    result = prev * current;
+                    break;
+                case '/':
+                    result = prev / current;
+                    break;
+                default:
+                    return;
+            }
+
+            currentInput = result.toString();
+            operation = null;
+            previousInput = '';
+            resetInput = true;
+            updateDisplay();
+        }
+
+        function clearDisplay() {
+            currentInput = '0';
+            previousInput = '';
+            operation = null;
+            updateDisplay();
+        }
+
+        function backspace() {
+            if (currentInput.length === 1 || (currentInput.length === 2 && currentInput.startsWith('-'))) {
+                currentInput = '0';
+            } else {
+                currentInput = currentInput.slice(0, -1);
+            }
+            updateDisplay();
+        }
+
+        // Initialize display
+        updateDisplay();
+    </script>
+</body>
+</html>
