@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1e40af">
+    <title>Scientific Calculator</title>
+    <link href="/dist/output.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js');
+            });
+        }
+    </script>
+    <style>
+        .btn-operator { background-color: #f59e0b; color: white; }
+        .btn-function { background-color: #4b5563; color: white; }
+        .btn-equals { background-color: #10b981; color: white; }
+        .btn-clear { background-color: #ef4444; color: white; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <header class="bg-blue-600 p-4 text-white">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="index.html" class="text-white hover:text-gray-200">
+                <i class="fas fa-arrow-left mr-2"></i> Back
+            </a>
+            <h1 class="text-xl font-bold">Scientific Calculator</h1>
+            <div class="w-8"></div>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 max-w-md">
+        <!-- Display -->
+        <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+            <div id="display" class="text-right text-3xl font-mono h-12 overflow-x-auto">0</div>
+            <div id="operation" class="text-right text-gray-500 h-6">&nbsp;</div>
+        </div>
+
+        <!-- Calculator Buttons -->
+        <div class="grid grid-cols-5 gap-2">
+            <!-- Row 1 -->
+            <button onclick="clearAll()" class="btn-clear p-3 rounded-lg font-bold text-lg shadow col-span-2">AC</button>
+            <button onclick="appendOperator('(')" class="btn-function p-3 rounded-lg font-bold text-lg shadow">(</button>
+            <button onclick="appendOperator(')')" class="btn-function p-3 rounded-lg font-bold text-lg shadow">)</button>
+            <button onclick="backspace()" class="bg-gray-200 p-3 rounded-lg font-bold text-lg shadow hover:bg-gray-300">⌫</button>
+
+            <!-- Row 2 -->
+            <button onclick="appendFunction('sin(')" class="btn-function p-3 rounded-lg font-bold text-lg shadow">sin</button>
+            <button onclick="appendFunction('cos(')" class="btn-function p-3 rounded-lg font-bold text-lg shadow">cos</button>
+            <button onclick="appendFunction('tan(')" class="btn-function p-3 rounded-lg font-bold text-lg shadow">tan</button>
+            <button onclick="appendOperator('^')" class="btn-operator p-3 rounded-lg font-bold text-lg shadow">^</button>
+            <button onclick="appendOperator('/')" class="btn-operator p-3 rounded-lg font-bold text-lg shadow">÷</button>
+
+            <!-- Row 3 -->
+            <button onclick="appendFunction('log(')" class="btn-function p-3 rounded-lg font-bold text-lg shadow">log</button>
+            <button onclick="appendFunction('ln(')" class="btn-function p-3 rounded-lg font-bold text-lg shadow">ln</button>
+            <button onclick="appendOperator('√')" class="btn-function p-3 rounded-lg font-bold text-lg shadow">√</button>
+            <button onclick="appendOperator('*')" class="btn-operator p-3 rounded-lg font-bold text-lg shadow">×</button>
+            <button onclick="appendOperator('-')" class="btn-operator p-3 rounded-lg font-bold text-lg shadow">-</button>
+
+            <!-- Row 4 -->
+            <button onclick="appendNumber('7')" class="bg-white p-3 rounded-lg font-bold text-lg shadow hover:bg-gray-100">7</button>
+            <button onclick="appendNumber('8')" class="bg-white p-3 rounded-lg font-bold text-lg shadow hover:bg-gray-100">8</button>
+            <button onclick="appendNumber('9')" class="bg-white p-3 rounded-lg font-bold text-lg shadow hover:bg-gray-100">9</button>
+            <button onclick="appendOperator('+')" class="btn-operator p-3 rounded-lg font-bold text-lg shadow row-span-2">+</button>
+
+            <!-- Row 5 -->
+            <button onclick="appendNumber('4')" class="bg-white p-3 rounded-lg font-bold text-lg shadow hover:bg-gray-100">4</button>
+            <button onclick="appendNumber('5')" class="bg-white p-3 rounded-lg font-bold text-lg shadow hover:bg-gray-100">5</button>
+            <button onclick="appendNumber('6')" class="bg-white p-3 rounded-lg font-bold text-lg shadow hover:bg-gray-100">6</button>
+
+            <!-- Row 6 -->
+            <button onclick="appendNumber('1')" class="bg-white p-3 rounded-lg font-bold text-lg shadow hover:bg-gray-100">1</button>
+            <button onclick="appendNumber('2')" class="bg-white p-3 rounded-lg font-bold text-lg shadow hover:bg-gray-100">2</button>
+            <button onclick="appendNumber('3')" class="bg-white p-3 rounded-lg font-bold text-lg shadow hover:bg-gray-100">3</button>
+            <button onclick="calculate()" class="btn-equals p-3 rounded-lg font-bold text-lg shadow row-span-2">=</button>
+
+            <!-- Row 7 -->
+            <button onclick="appendNumber('0')" class="bg-white p-3 rounded-lg font-bold text-lg shadow hover:bg-gray-100 col-span-2">0</button>
+            <button onclick="appendNumber('.')" class="bg-white p-3 rounded-lg font-bold text-lg shadow hover:bg-gray-100">.</button>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white p-4 text-center mt-8">
+        <p>&copy; 2023 Calculator App | <a href="index.html" class="text-blue-300 hover:underline">All Calculators</a></p>
+    </footer>
+
+    <script>
+        let currentInput = '0';
+        let previousInput = '';
+        let operation = null;
+        let resetInput = false;
+
+        const display = document.getElementById('display');
+        const operationDisplay = document.getElementById('operation');
+
+        function updateDisplay() {
+            display.textContent = currentInput;
+            operationDisplay.textContent = previousInput + (operation ? ' ' + operation : '');
+        }
+
+        function appendNumber(number) {
+            if (currentInput === '0' || resetInput) {
+                currentInput = number;
+                resetInput = false;
+            } else {
+                currentInput += number;
+            }
+            updateDisplay();
+        }
+
+        function appendOperator(op) {
+            if (operation !== null) calculate();
+            previousInput = currentInput;
+            operation = op;
+            resetInput = true;
+            updateDisplay();
+        }
+
+        function appendFunction(func) {
+            currentInput = func;
+            resetInput = false;
+            updateDisplay();
+        }
+
+        function calculate() {
+            let result;
+            const prev = parseFloat(previousInput);
+            const current = parseFloat(currentInput);
+
+            try {
+                // Evaluate complex expressions using math.js would be better here
+                result = eval(previousInput + operation + currentInput);
+            } catch (e) {
+                result = 'Error';
+            }
+
+            currentInput = result.toString();
+            operation = null;
+            previousInput = '';
+            resetInput = true;
+            updateDisplay();
+        }
+
+        function clearAll() {
+            currentInput = '0';
+            previousInput = '';
+            operation = null;
+            updateDisplay();
+        }
+
+        function backspace() {
+            if (currentInput.length === 1 || (currentInput.length === 2 && currentInput.startsWith('-'))) {
+                currentInput = '0';
+            } else {
+                currentInput = currentInput.slice(0, -1);
+            }
+            updateDisplay();
+        }
+
+        // Initialize display
+        updateDisplay();
+    </script>
+</body>
+</html>
