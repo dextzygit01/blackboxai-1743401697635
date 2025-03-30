@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1e40af">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <title>Multi-Function Calculator</title>
+    <link href="/dist/output.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('Service Worker registered'))
+            .catch(err => console.log('Registration failed: ', err));
+        });
+      }
+    </script>
+</head>
+<body class="bg-gray-100">
+    <header class="bg-blue-600 p-4 text-white text-center shadow-md">
+        <h1 class="text-3xl font-bold">Multi-Function Calculator</h1>
+        <p class="mt-2">Choose from 10 different calculation tools</p>
+    </header>
+
+    <main class="container mx-auto p-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+            <!-- Basic Calculator -->
+            <a href="basic.html" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div class="flex items-center">
+                    <i class="fas fa-calculator text-blue-500 text-2xl mr-4"></i>
+                    <h3 class="text-xl font-bold">Basic Calculator</h3>
+                </div>
+                <p class="mt-2 text-gray-600">Perform simple arithmetic operations</p>
+            </a>
+
+            <!-- Scientific Calculator -->
+            <a href="scientific.html" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div class="flex items-center">
+                    <i class="fas fa-square-root-alt text-blue-500 text-2xl mr-4"></i>
+                    <h3 class="text-xl font-bold">Scientific Calculator</h3>
+                </div>
+                <p class="mt-2 text-gray-600">Advanced math functions and operations</p>
+            </a>
+
+            <!-- Unit Converter -->
+            <a href="unit.html" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div class="flex items-center">
+                    <i class="fas fa-ruler-combined text-blue-500 text-2xl mr-4"></i>
+                    <h3 class="text-xl font-bold">Unit Converter</h3>
+                </div>
+                <p class="mt-2 text-gray-600">Convert between different measurement units</p>
+            </a>
+
+            <!-- Currency Converter -->
+            <a href="currency.html" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div class="flex items-center">
+                    <i class="fas fa-money-bill-wave text-blue-500 text-2xl mr-4"></i>
+                    <h3 class="text-xl font-bold">Currency Converter</h3>
+                </div>
+                <p class="mt-2 text-gray-600">Convert between world currencies</p>
+            </a>
+
+            <!-- BMI Calculator -->
+            <a href="bmi.html" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div class="flex items-center">
+                    <i class="fas fa-weight text-blue-500 text-2xl mr-4"></i>
+                    <h3 class="text-xl font-bold">BMI Calculator</h3>
+                </div>
+                <p class="mt-2 text-gray-600">Calculate your Body Mass Index</p>
+            </a>
+
+            <!-- Tax Calculator -->
+            <a href="tax.html" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div class="flex items-center">
+                    <i class="fas fa-receipt text-blue-500 text-2xl mr-4"></i>
+                    <h3 class="text-xl font-bold">Tax Calculator</h3>
+                </div>
+                <p class="mt-2 text-gray-600">Estimate your tax obligations</p>
+            </a>
+
+            <!-- Tip Calculator -->
+            <a href="tip.html" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div class="flex items-center">
+                    <i class="fas fa-utensils text-blue-500 text-2xl mr-4"></i>
+                    <h3 class="text-xl font-bold">Tip Calculator</h3>
+                </div>
+                <p class="mt-2 text-gray-600">Calculate restaurant tips</p>
+            </a>
+
+            <!-- Loan Calculator -->
+            <a href="loan.html" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div class="flex items-center">
+                    <i class="fas fa-home text-blue-500 text-2xl mr-4"></i>
+                    <h3 class="text-xl font-bold">Loan Calculator</h3>
+                </div>
+                <p class="mt-2 text-gray-600">Calculate loan payments</p>
+            </a>
+
+            <!-- Temperature Converter -->
+            <a href="temp.html" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div class="flex items-center">
+                    <i class="fas fa-temperature-high text-blue-500 text-2xl mr-4"></i>
+                    <h3 class="text-xl font-bold">Temperature Converter</h3>
+                </div>
+                <p class="mt-2 text-gray-600">Convert between temperature units</p>
+            </a>
+
+            <!-- Date Calculator -->
+            <a href="date.html" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div class="flex items-center">
+                    <i class="fas fa-calendar-alt text-blue-500 text-2xl mr-4"></i>
+                    <h3 class="text-xl font-bold">Date Calculator</h3>
+                </div>
+                <p class="mt-2 text-gray-600">Calculate days between dates</p>
+            </a>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white p-4 text-center mt-12">
+        <p>&copy; 2023 Multi-Function Calculator | Built with Tailwind CSS</p>
+    </footer>
+</body>
+</html>
