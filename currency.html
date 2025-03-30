@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1e40af">
+    <title>Currency Converter</title>
+    <link href="/dist/output.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js');
+            });
+        }
+    </script>
+    <style>
+        .btn-convert {
+            background-color: #10b981;
+            color: white;
+        }
+        select, input {
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <header class="bg-blue-600 p-4 text-white">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="index.html" class="text-white hover:text-gray-200">
+                <i class="fas fa-arrow-left mr-2"></i> Back
+            </a>
+            <h1 class="text-xl font-bold">Currency Converter</h1>
+            <div class="w-8"></div>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 max-w-md">
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <!-- API Key Configuration -->
+            <div class="mb-4 p-3 bg-blue-50 rounded-lg">
+                <label class="block text-gray-700 mb-1 text-sm font-medium">Exchange Rate API Key</label>
+                <div class="flex">
+                    <input type="password" id="apiKey" class="flex-1 p-2 border rounded-l" placeholder="Enter API key">
+                    <button onclick="saveApiKey()" class="bg-blue-500 text-white px-3 rounded-r hover:bg-blue-600">
+                        Save
+                    </button>
+                </div>
+                <div id="apiKeyHelp" class="text-xs mt-1 space-y-1">
+                    <p class="text-gray-500">Get a free key from <a href="https://www.exchangerate-api.com" target="_blank" class="text-blue-500 hover:underline">exchangerate-api.com</a></p>
+                    <p id="apiKeyError" class="text-red-500 hidden">Please enter a valid API key</p>
+                    <p id="apiKeySuccess" class="text-green-500 hidden">✓ API key saved successfully</p>
+                    <div id="apiKeyLoading" class="hidden">
+                        <svg class="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Amount Input -->
+            <div class="mb-4">
+                <label class="block text-gray-700 mb-2">Amount</label>
+                <input type="number" id="amount" class="w-full p-2 border rounded" placeholder="Enter amount" value="1">
+            </div>
+
+            <!-- Currency Selection -->
+            <div class="grid grid-cols-3 gap-4 mb-4">
+                <div class="col-span-2">
+                    <select id="fromCurrency" class="w-full p-2 border rounded">
+                        <option value="USD">US Dollar (USD)</option>
+                        <option value="EUR">Euro (EUR)</option>
+                        <option value="GBP">British Pound (GBP)</option>
+                        <option value="JPY">Japanese Yen (JPY)</option>
+                        <option value="CAD">Canadian Dollar (CAD)</option>
+                        <option value="AUD">Australian Dollar (AUD)</option>
+                        <option value="CNY">Chinese Yuan (CNY)</option>
+                    </select>
+                </div>
+                <div class="flex items-center">
+                    <button onclick="swapCurrencies()" class="bg-gray-200 p-2 rounded hover:bg-gray-300">
+                        <i class="fas fa-exchange-alt"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                    <select id="toCurrency" class="w-full p-2 border rounded">
+                        <option value="EUR">Euro (EUR)</option>
+                        <option value="USD">US Dollar (USD)</option>
+                        <option value="GBP">British Pound (GBP)</option>
+                        <option value="JPY">Japanese Yen (JPY)</option>
+                        <option value="CAD">Canadian Dollar (CAD)</option>
+                        <option value="AUD">Australian Dollar (AUD)</option>
+                        <option value="CNY">Chinese Yuan (CNY)</option>
+                    </select>
+                </div>
+                <div>
+                    <button onclick="convertCurrency()" class="btn-convert w-full p-2 rounded font-bold">Convert</button>
+                </div>
+            </div>
+
+            <!-- Result Display -->
+            <div id="result" class="text-center text-xl font-bold p-4 bg-gray-100 rounded-lg">
+                1 USD = 0.85 EUR
+            </div>
+
+            <!-- Last Updated and Refresh -->
+            <div class="flex justify-between items-center mt-2">
+                <div id="lastUpdated" class="text-sm text-gray-500"></div>
+                <button onclick="fetchExchangeRates()" class="text-blue-500 hover:text-blue-700 text-sm font-medium">
+                    <i class="fas fa-sync-alt mr-1"></i> Refresh Rates
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white p-4 text-center mt-8">
+        <p>&copy; 2023 Calculator App | <a href="index.html" class="text-blue-300 hover:underline">All Calculators</a></p>
+    </footer>
+
+    <script>
+        let exchangeRates = {};
+        const API_KEY = 'YOUR_API_KEY'; // Replace with actual API key
+        const CURRENCIES = ['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'CNY'];
+
+        // API Key Management
+        function saveApiKey() {
+            const key = document.getElementById('apiKey').value.trim();
+            if (key) {
+                localStorage.setItem('exchangeRateApiKey', key);
+                alert('API key saved successfully');
+                fetchExchangeRates();
+            }
+        }
+
+        // Load saved API key on startup
+        function loadApiKey() {
+            const savedKey = localStorage.getItem('exchangeRateApiKey');
+            if (savedKey) {
+                document.getElementById('apiKey').value = savedKey;
+            }
+        }
+
+        // Fetch live exchange rates with caching
+        async function fetchExchangeRates() {
+            const apiKey = localStorage.getItem('exchangeRateApiKey') || 'YOUR_API_KEY';
+            // Check for cached rates first
+            const cachedRates = localStorage.getItem('currencyRates');
+            const cachedTime = localStorage.getItem('currencyRatesTime');
+            
+            // Use cached rates if less than 1 hour old
+            if (cachedRates && cachedTime && 
+                Date.now() - cachedTime < 3600000) {
+                exchangeRates = JSON.parse(cachedRates);
+                document.getElementById('lastUpdated').textContent = 
+                    `Using cached rates from ${new Date(Number(cachedTime)).toLocaleString()}`;
+                convertCurrency();
+                return;
+            }
+
+            try {
+                // Use our local proxy server
+                const response = await fetch(`http://localhost:3000/api/rates?apiKey=${apiKey}`);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    // Handle API key errors specifically
+                    if (response.status === 400 && data.error === 'Invalid API key') {
+                        document.getElementById('lastUpdated').textContent = 'Please enter a valid API key';
+                        document.getElementById('lastUpdated').classList.add('text-red-500');
+                        return;
+                    }
+                    throw new Error(data.error || `HTTP error! status: ${response.status}`);
+                }
+                
+                exchangeRates = data.rates;
+                
+                // Cache the new rates
+                localStorage.setItem('currencyRates', JSON.stringify(exchangeRates));
+                localStorage.setItem('currencyRatesTime', Date.now().toString());
+                
+                updateLastUpdated();
+                convertCurrency();
+            } catch (error) {
+                console.error('Error fetching rates:', error);
+                // Fallback to cached or default rates
+                if (cachedRates) {
+                    exchangeRates = JSON.parse(cachedRates);
+                    document.getElementById('lastUpdated').textContent = 
+                        `Using cached rates from ${new Date(Number(cachedTime)).toLocaleString()}`;
+                    document.getElementById('lastUpdated').classList.remove('text-red-500');
+                } else {
+                    exchangeRates = {
+                        USD: 1, EUR: 0.85, GBP: 0.73, JPY: 110.15, 
+                        CAD: 1.25, AUD: 1.30, CNY: 6.40
+                    };
+                    document.getElementById('lastUpdated').textContent = 
+                        'Using default rates - could not fetch live rates';
+                    document.getElementById('lastUpdated').classList.add('text-red-500');
+                }
+                convertCurrency();
+            }
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            document.getElementById('amount').addEventListener('input', convertCurrency);
+            document.getElementById('fromCurrency').addEventListener('change', convertCurrency);
+            document.getElementById('toCurrency').addEventListener('change', convertCurrency);
+            fetchExchangeRates();
+        };
+
+        // Convert currency
+        function convertCurrency() {
+            const amount = parseFloat(document.getElementById('amount').value) || 0;
+            const fromCurrency = document.getElementById('fromCurrency').value;
+            const toCurrency = document.getElementById('toCurrency').value;
+            
+            if (fromCurrency === toCurrency) {
+                document.getElementById('result').textContent = `${amount} ${fromCurrency} = ${amount} ${toCurrency}`;
+                return;
+            }
+
+            // Calculate rate based on USD as base currency
+            const fromRate = exchangeRates[fromCurrency];
+            const toRate = exchangeRates[toCurrency];
+            const rate = toRate / fromRate;
+            const convertedAmount = (amount * rate).toFixed(2);
+            
+            document.getElementById('result').textContent = 
+                `${amount} ${fromCurrency} = ${convertedAmount} ${toCurrency}`;
+        }
+
+        // Swap currencies
+        function swapCurrencies() {
+            const fromSelect = document.getElementById('fromCurrency');
+            const toSelect = document.getElementById('toCurrency');
+            const tempIndex = fromSelect.selectedIndex;
+            fromSelect.selectedIndex = toSelect.selectedIndex;
+            toSelect.selectedIndex = tempIndex;
+            convertCurrency();
+        }
+
+        // Update last updated time
+        function updateLastUpdated() {
+            const now = new Date();
+            document.getElementById('lastUpdated').textContent = 
+                `Rates updated: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+        }
+    </script>
+</body>
+</html>
